@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# ==========================================================
+# Advanced Disk Space Alert Script
+# ==========================================================
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+RESET='\033[0m'
+
+THRESHOLD=85
+
+clear
+echo -e "${CYAN}=== DISK SPACE HEALTH CHECK ===${RESET}"
+
+df -h -x tmpfs -x devtmpfs 2>/dev/null | tail -n +2 | while read -r fs size used avail percent mount; do
+    usage=${percent%\%}
+    
+    if [ "$usage" -lt 70 ]; then
+        echo -e "  ${GREEN}✓${RESET} Mount $mount is healthy (${percent} used)"
+    elif [ "$usage" -lt "$THRESHOLD" ]; then
+        echo -e "  ${YELLOW}!${RESET} Mount $mount usage is getting high: ${percent}"
+    else
+        echo -e "  ${RED}✗ CRITICAL!${RESET} Mount $mount is at ${percent}!"
+    fi
+done
+echo
